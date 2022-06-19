@@ -9,3 +9,12 @@ main {
 main > * {
   margin: 1rem 0;
 }
+
+.item-edit-line {
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.item-edit-line > * {
+  margin-right: 15px;
+}

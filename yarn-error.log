@@ -1,0 +1,106 @@
+Arguments: 
+  /home/suman/.nvm/versions/node/v14.18.0/bin/node /home/suman/.nvm/versions/node/v14.18.0/bin/yarn
+
+PATH: 
+  /home/suman/Android/Sdk/platform-tools:/home/suman/Android/Sdk/platform-tools:/home/suman/anaconda3/bin:/home/suman/anaconda3/condabin:/home/suman/.nvm/versions/node/v14.18.0/bin:/home/suman/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/suman/.yarn/bin:/home/suman/.fzf/bin:/home/suman/Android/sdk/emulator:/home/suman/Android/sdk/platform-tools:/home/suman/Android/Sdk/tools:/home/suman/Android/sdk/emulator:/home/suman/Android/sdk/platform-tools:/home/suman/Android/Sdk/tools
+
+Yarn version: 
+  1.22.17
+
+Node version: 
+  14.18.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  SyntaxError: /home/suman/Projects/dotenv-editor-ts/package.json: Unexpected token } in JSON at position 991
+      at JSON.parse (<anonymous>)
+      at /home/suman/.nvm/versions/node/v14.18.0/lib/node_modules/yarn/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/home/suman/.nvm/versions/node/v14.18.0/lib/node_modules/yarn/lib/cli.js:310:30)
+      at /home/suman/.nvm/versions/node/v14.18.0/lib/node_modules/yarn/lib/cli.js:321:13
+
+npm manifest: 
+  {
+  	"name": "dotenv-editor-ts",
+  	"displayName": "dotenv-editor-ts",
+  	"description": "",
+  	"version": "0.0.1",
+  	"engines": {
+  		"vscode": "^1.68.0"
+  	},
+  	"categories": [
+  		"Other"
+  	],
+  	"activationEvents": [
+  		"onCommand:dotenv-editor-ts.openEditor"
+  	],
+  	"main": "./out/extension.js",
+  	"contributes": {
+  		"commands": [
+  			{
+  				"command": "dotenv-editor-ts.openEditor",
+  				"title": "Open Webview"
+  			}
+  		],
+  		"languages": [
+  			{
+  				"id": "dummyConfig",
+  				"aliases": [
+  					"DummyConfig",
+  					"dc"
+  				],
+  				"extensions": [
+  					".env"
+  				]
+  			}
+  		]
+  	},
+  	"scripts": {
+  		"vscode:prepublish": "yarn run compile",
+  		"compile": "npm-run-all compile:*",
+  		"watch": "npm-run-all -p watch:*",
+  		"pretest": "yarn run compile && yarn run lint",
+  		"lint": "eslint src --ext ts",
+  		"test": "node ./out/test/runTest.js",
+  		"compile:extension": "tsc -p ./",
+  		"compile:views": "webpack --mode development",
+  		"watch:extension": "tsc -watch -p ./",
+  		"watch:views": "webpack --watch --mode development",
+  	},
+  	"devDependencies": {
+  		"@types/glob": "^7.2.0",
+  		"@types/mocha": "^9.1.1",
+  		"@types/node": "16.x",
+  		"@types/react": "^18.0.14",
+  		"@types/react-dom": "^18.0.5",
+  		"@types/vscode": "^1.68.0",
+  		"@typescript-eslint/eslint-plugin": "^5.27.0",
+  		"@typescript-eslint/parser": "^5.27.0",
+  		"@vscode/test-electron": "^2.1.3",
+  		"css-loader": "^6.7.1",
+  		"eslint": "^8.16.0",
+  		"glob": "^8.0.3",
+  		"mocha": "^10.0.0",
+  		"npm-run-all": "^4.1.5",
+  		"style-loader": "^3.3.1",
+  		"ts-loader": "^9.3.0",
+  		"typescript": "^4.7.2",
+  		"webpack": "^5.73.0",
+  		"webpack-cli": "^4.10.0"
+  	},
+  	"dependencies": {
+  		"@vscode/webview-ui-toolkit": "^1.0.0",
+  		"react": "^18.2.0",
+  		"react-dom": "^18.2.0",
+  		"uuid": "^8.3.2",
+  		"vscode": "^1.1.37"
+  	}
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

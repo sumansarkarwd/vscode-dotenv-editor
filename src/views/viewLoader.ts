@@ -8,6 +8,7 @@ import {
 } from "./app/model";
 import * as fs from "fs";
 import * as path from "path";
+import { v4 as uuidv4 } from "uuid";
 
 export default class ViewLoader {
   private readonly _panel: vscode.WebviewPanel | undefined;
@@ -85,9 +86,15 @@ export default class ViewLoader {
     if (fs.existsSync(fileUri.fsPath)) {
       let content = fs.readFileSync(fileUri.fsPath, "utf8");
 
-      const envConfig: IEnvConfigFile = {};
+      const envConfig: IEnvConfigFile = {
+        default: {
+          name: "default",
+          items: [],
+          enabled: false,
+        },
+      };
 
-      let currentBlock: string;
+      let currentBlock: string = "default";
 
       content.split(/\r?\n/).forEach((line) => {
         if (line.startsWith("# Block")) {
@@ -105,7 +112,7 @@ export default class ViewLoader {
         } else {
           let envValLine: string;
 
-          if (line.length > 0) {
+          if (line.trim().length > 0) {
             let enabled = false;
             if (line.startsWith("#")) {
               envValLine = line.substring(1).trim();
@@ -116,8 +123,9 @@ export default class ViewLoader {
 
             const [key, value] = envValLine.split("=");
             envConfig[currentBlock].items.push({
-              name: key.trim(),
-              value: value.trim(),
+              id: uuidv4(),
+              name: key?.trim() || "",
+              value: value ? value.trim() : "",
               enabled,
             });
           }
@@ -130,19 +138,28 @@ export default class ViewLoader {
         });
       });
 
+      if (!envConfig["default"].items.length) {
+        if (Object.keys(envConfig).length) {
+          // if default does not have any items and have other block then delete default block
+          delete envConfig["default"];
+        }
+      }
+
       return envConfig;
     }
     return undefined;
   }
 
-  private saveFileContent(fileUri: vscode.Uri, config: IConfig) {
-    if (fs.existsSync(fileUri.fsPath)) {
-      let content: string = JSON.stringify(config);
-      fs.writeFileSync(fileUri.fsPath, content);
+  private saveFileContent(fileUri: vscode.Uri, config: IEnvConfigFile) {
+    console.log("config", config);
 
-      vscode.window.showInformationMessage(
-        `👍 Configuration saved to ${fileUri.fsPath}`
-      );
-    }
+    // if (fs.existsSync(fileUri.fsPath)) {
+    //   let content: string = JSON.stringify(config);
+    //   fs.writeFileSync(fileUri.fsPath, content);
+
+    //   vscode.window.showInformationMessage(
+    //     `👍 Configuration saved to ${fileUri.fsPath}`
+    //   );
+    // }
   }
 }

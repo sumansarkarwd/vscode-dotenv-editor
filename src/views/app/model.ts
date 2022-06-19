@@ -11,7 +11,7 @@ export interface IUser {
 
 export interface ICommand {
   action: CommandAction;
-  content: IConfig;
+  content: IEnvConfigFile;
 }
 
 export enum CommandAction {
@@ -19,6 +19,7 @@ export enum CommandAction {
 }
 
 export interface IEnvConfig {
+  id: string;
   name: string;
   value: string;
   enabled: boolean;

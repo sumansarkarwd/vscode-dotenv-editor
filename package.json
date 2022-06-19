@@ -43,8 +43,7 @@
 		"compile:extension": "tsc -p ./",
 		"compile:views": "webpack --mode development",
 		"watch:extension": "tsc -watch -p ./",
-		"watch:views": "webpack --watch --mode development",
-		"postinstall": "node ./node_modules/vscode/bin/install"
+		"watch:views": "webpack --watch --mode development"
 	},
 	"devDependencies": {
 		"@types/glob": "^7.2.0",
@@ -52,6 +51,7 @@
 		"@types/node": "16.x",
 		"@types/react": "^18.0.14",
 		"@types/react-dom": "^18.0.5",
+		"@types/uuid": "^8.3.4",
 		"@types/vscode": "^1.68.0",
 		"@typescript-eslint/eslint-plugin": "^5.27.0",
 		"@typescript-eslint/parser": "^5.27.0",
@@ -70,6 +70,7 @@
 	"dependencies": {
 		"@vscode/webview-ui-toolkit": "^1.0.0",
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0"
+		"react-dom": "^18.2.0",
+		"uuid": "^8.3.2"
 	}
 }
