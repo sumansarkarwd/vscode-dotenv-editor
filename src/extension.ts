@@ -1,0 +1,41 @@
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
+import * as vscode from "vscode";
+
+// this method is called when your extension is activated
+// your extension is activated the very first time the command is executed
+export function activate(context: vscode.ExtensionContext) {
+  let disposable = vscode.commands.registerCommand(
+    "dotenv-editor-ts.openEditor",
+    () => {
+      let openDialogOptions: vscode.OpenDialogOptions = {
+        canSelectFiles: true,
+        canSelectFolders: false,
+        canSelectMany: false,
+        filters: {
+          Json: ["json"],
+        },
+        // open current workspace directory or user home directory
+        defaultUri: vscode.workspace.workspaceFolders
+          ? vscode.workspace.workspaceFolders[0].uri
+          : vscode.Uri.file(process.env.HOME || "/"),
+      };
+
+      vscode.window
+        .showOpenDialog(openDialogOptions)
+        .then(async (uri: vscode.Uri[] | undefined) => {
+          if (uri && uri.length > 0) {
+            vscode.window.showInformationMessage(uri[0].fsPath);
+          } else {
+            vscode.window.showErrorMessage("No valid file selected!");
+            return;
+          }
+        });
+    }
+  );
+
+  context.subscriptions.push(disposable);
+}
+
+// this method is called when your extension is deactivated
+export function deactivate() {}
