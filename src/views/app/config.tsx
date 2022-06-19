@@ -1,5 +1,6 @@
 import * as React from "react";
 import { ICommand, CommandAction, IEnvConfigFile, IEnvConfig } from "./model";
+import { VSCodeCheckbox, VSCodeTextField, VSCodeTag, VSCodeDivider } from "@vscode/webview-ui-toolkit/react";
 
 interface IConfigProps {
     vscode: any;
@@ -67,9 +68,8 @@ export default class Config extends React.Component<
         return items.map((item) => {
             return (
                 <div key={item.name}>
-                    <input type="checkbox" id={item.name}  checked={item.enabled} />
-                    <label htmlFor={item.name}>{item.name}</label>
-                    <input type="text" value={item.value} />
+                    <VSCodeCheckbox checked={item.enabled}>{item.name}</VSCodeCheckbox>
+                    <VSCodeTextField value={item.value} placeholder={`Enter ${item.name}`}/>
                 </div>
             );
         });
@@ -80,9 +80,11 @@ export default class Config extends React.Component<
         return Object.keys(config).map((key) => {
             return (
                 <div key={key}>
-                    <h3>Block: {key}</h3>
+                    <VSCodeCheckbox checked={config[key].enabled}><h3>{key}</h3></VSCodeCheckbox>
+                    <VSCodeDivider/>
 
                     {this.renderItems(config[key].items)}
+                    <VSCodeDivider/>
                 </div>
             );
         });
@@ -91,7 +93,6 @@ export default class Config extends React.Component<
     render() {
         return (
             <>
-                <h1>Hola!</h1>
                 {this.renderBlocks(this.state.config)}
                 <br />
                 {/* <input

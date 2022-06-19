@@ -99,6 +99,7 @@ export default class ViewLoader {
             envConfig[value] = {
               name: value,
               items: [],
+              enabled: false,
             };
           }
         } else {
@@ -121,6 +122,12 @@ export default class ViewLoader {
             });
           }
         }
+
+        Object.keys(envConfig).forEach((key) => {
+          envConfig[key].enabled = envConfig[key].items.some(
+            (item) => item.enabled
+          );
+        });
       });
 
       return envConfig;

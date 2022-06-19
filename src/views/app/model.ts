@@ -26,6 +26,7 @@ export interface IEnvConfig {
 export interface IEnvConfigBlock {
   name: string;
   items: IEnvConfig[];
+  enabled: boolean;
 }
 
 export interface IEnvConfigFile {

@@ -1,11 +1,11 @@
-li {
-    margin-bottom: 15px;
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100%;
 }
 
-input {
-    margin-left: 10px;
-}
-
-.save {
-    margin-top: 10px;
+main > * {
+  margin: 1rem 0;
 }

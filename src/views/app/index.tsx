@@ -2,13 +2,13 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import "./index.css";
-import { IConfig } from "./model";
+import { IEnvConfigFile } from "./model";
 import Config from "./config";
 
 declare global {
   interface Window {
     acquireVsCodeApi(): any;
-    initialData: IConfig;
+    initialData: IEnvConfigFile;
   }
 }
 
