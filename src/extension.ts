@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
+import ViewLoader from "./views/viewLoader";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -25,7 +26,9 @@ export function activate(context: vscode.ExtensionContext) {
         .showOpenDialog(openDialogOptions)
         .then(async (uri: vscode.Uri[] | undefined) => {
           if (uri && uri.length > 0) {
-            vscode.window.showInformationMessage(uri[0].fsPath);
+            const filePath = uri[0].fsPath;
+            vscode.window.showInformationMessage(`Opening ${filePath}`);
+            const view = new ViewLoader(uri[0]);
           } else {
             vscode.window.showErrorMessage("No valid file selected!");
             return;
