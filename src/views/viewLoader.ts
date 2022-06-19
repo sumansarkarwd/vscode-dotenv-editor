@@ -1,11 +1,12 @@
 import * as vscode from "vscode";
-import { IConfig } from "./app/model";
+import { CommandAction, ICommand, IConfig } from "./app/model";
 import * as fs from "fs";
 import * as path from "path";
 
 export default class ViewLoader {
   private readonly _panel: vscode.WebviewPanel | undefined;
   private readonly _extensionPath: string;
+  private _disposables: vscode.Disposable[] = [];
 
   constructor(fileUri: vscode.Uri, extensionPath: string) {
     this._extensionPath = extensionPath;
@@ -26,6 +27,18 @@ export default class ViewLoader {
       );
 
       this._panel.webview.html = this.getWebviewContent(config);
+
+      this._panel.webview.onDidReceiveMessage(
+        (command: ICommand) => {
+          switch (command.action) {
+            case CommandAction.Save:
+              this.saveFileContent(fileUri, command.content);
+              return;
+          }
+        },
+        undefined,
+        this._disposables
+      );
     }
   }
 
@@ -70,5 +83,16 @@ export default class ViewLoader {
       return config;
     }
     return undefined;
+  }
+
+  private saveFileContent(fileUri: vscode.Uri, config: IConfig) {
+    if (fs.existsSync(fileUri.fsPath)) {
+      let content: string = JSON.stringify(config);
+      fs.writeFileSync(fileUri.fsPath, content);
+
+      vscode.window.showInformationMessage(
+        `👍 Configuration saved to ${fileUri.fsPath}`
+      );
+    }
   }
 }

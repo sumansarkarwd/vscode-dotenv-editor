@@ -8,3 +8,12 @@ export interface IUser {
   active: boolean;
   roles: string[];
 }
+
+export interface ICommand {
+  action: CommandAction;
+  content: IConfig;
+}
+
+export enum CommandAction {
+  Save,
+}
