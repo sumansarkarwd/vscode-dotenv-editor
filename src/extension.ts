@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
           if (uri && uri.length > 0) {
             const filePath = uri[0].fsPath;
             vscode.window.showInformationMessage(`Opening ${filePath}`);
-            const view = new ViewLoader(uri[0]);
+            const view = new ViewLoader(uri[0], context.extensionPath);
           } else {
             vscode.window.showErrorMessage("No valid file selected!");
             return;
