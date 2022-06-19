@@ -28,7 +28,7 @@
 					"dc"
 				],
 				"extensions": [
-					".json"
+					".env"
 				]
 			}
 		]

@@ -17,3 +17,17 @@ export interface ICommand {
 export enum CommandAction {
   Save,
 }
+
+export interface IEnvConfig {
+  name: string;
+  value: string;
+  enabled: boolean;
+}
+export interface IEnvConfigBlock {
+  name: string;
+  items: IEnvConfig[];
+}
+
+export interface IEnvConfigFile {
+  [name: string]: IEnvConfigBlock;
+}

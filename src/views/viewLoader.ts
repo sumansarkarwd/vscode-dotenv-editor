@@ -1,5 +1,11 @@
 import * as vscode from "vscode";
-import { CommandAction, ICommand, IConfig } from "./app/model";
+import {
+  CommandAction,
+  ICommand,
+  IConfig,
+  IEnvConfig,
+  IEnvConfigFile,
+} from "./app/model";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -11,8 +17,8 @@ export default class ViewLoader {
   constructor(fileUri: vscode.Uri, extensionPath: string) {
     this._extensionPath = extensionPath;
 
-    let config = this.getFileContent(fileUri);
-    if (config) {
+    let envConfig = this.getFileContent(fileUri);
+    if (envConfig) {
       this._panel = vscode.window.createWebviewPanel(
         "configView",
         "Config View",
@@ -26,7 +32,7 @@ export default class ViewLoader {
         }
       );
 
-      this._panel.webview.html = this.getWebviewContent(config);
+      this._panel.webview.html = this.getWebviewContent(envConfig);
 
       this._panel.webview.onDidReceiveMessage(
         (command: ICommand) => {
@@ -42,7 +48,7 @@ export default class ViewLoader {
     }
   }
 
-  private getWebviewContent(config: IConfig): string {
+  private getWebviewContent(config: IEnvConfigFile): string {
     // Local path to main script run in the webview
     const reactAppPathOnDisk = vscode.Uri.file(
       path.join(this._extensionPath, "configViewer", "configViewer.js")
@@ -75,12 +81,49 @@ export default class ViewLoader {
     `;
   }
 
-  private getFileContent(fileUri: vscode.Uri): IConfig | undefined {
+  private getFileContent(fileUri: vscode.Uri): IEnvConfigFile | undefined {
     if (fs.existsSync(fileUri.fsPath)) {
       let content = fs.readFileSync(fileUri.fsPath, "utf8");
-      let config: IConfig = JSON.parse(content);
 
-      return config;
+      const envConfig: IEnvConfigFile = {};
+
+      let currentBlock: string;
+
+      content.split(/\r?\n/).forEach((line) => {
+        if (line.startsWith("# Block")) {
+          const [key, value] = line.split("=");
+
+          currentBlock = value;
+
+          if (!envConfig[value]) {
+            envConfig[value] = {
+              name: value,
+              items: [],
+            };
+          }
+        } else {
+          let envValLine: string;
+
+          if (line.length > 0) {
+            let enabled = false;
+            if (line.startsWith("#")) {
+              envValLine = line.substring(1).trim();
+            } else {
+              envValLine = line;
+              enabled = true;
+            }
+
+            const [key, value] = envValLine.split("=");
+            envConfig[currentBlock].items.push({
+              name: key.trim(),
+              value: value.trim(),
+              enabled,
+            });
+          }
+        }
+      });
+
+      return envConfig;
     }
     return undefined;
   }

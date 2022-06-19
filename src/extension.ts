@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
         canSelectFolders: false,
         canSelectMany: false,
         filters: {
-          Json: ["json"],
+          Env: ["env"],
         },
         // open current workspace directory or user home directory
         defaultUri: vscode.workspace.workspaceFolders
