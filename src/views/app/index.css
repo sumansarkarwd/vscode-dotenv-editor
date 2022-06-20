@@ -29,3 +29,8 @@ main > * {
   justify-content: end;
   padding: 1rem;
 }
+
+.block-heading-container {
+  display: flex;
+  align-items: center;
+}
