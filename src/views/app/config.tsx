@@ -7,6 +7,7 @@ import {
   VSCodeButton,
   VSCodeDivider,
 } from "@vscode/webview-ui-toolkit/react";
+import { v4 as uuidv4 } from "uuid";
 
 interface IConfigProps {
   vscode: any;
@@ -14,7 +15,19 @@ interface IConfigProps {
 }
 
 const ReactFCComponent: React.FC<IConfigProps> = (props) => {
-  const [state, setState] = React.useState<IEnvConfigFile>(props.initialData);
+  let initialData = props.initialData;
+
+  let oldState = props.vscode.getState();
+  if (oldState) {
+    initialData = oldState;
+  }
+
+  const [state, setState] = React.useState<IEnvConfigFile>(initialData);
+
+  const updateState = (newState) => {
+    setState(newState);
+    props.vscode.setState(newState);
+  };
 
   const saveConfig = () => {
     let command: ICommand = {
@@ -46,7 +59,19 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
         }
       });
     }
-    
+
+    updateState(newState);
+  };
+
+  const addNewItemToBlock = (key) => {
+    const newState = { ...state };
+    newState[key].items.push({
+      id: uuidv4(),
+      enabled: false,
+      name: "",
+      value: "",
+    });
+
     updateState(newState);
   };
 
@@ -54,14 +79,22 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
     return Object.keys(config).map((key) => {
       return (
         <div key={key}>
-          <VSCodeCheckbox
-            checked={config[key].enabled}
-            id={key}
-            value={key}
-            onClick={() => onChangeBlockEnabledState(key)}
-          >
-            <h2>{key}</h2>
-          </VSCodeCheckbox>
+          <div className="block-heading-container">
+            <VSCodeCheckbox
+              checked={config[key].enabled}
+              id={key}
+              value={key}
+              onClick={() => onChangeBlockEnabledState(key)}
+            >
+              <h2>{key}</h2>
+            </VSCodeCheckbox>
+            <VSCodeButton
+              title="Add item to block"
+              onClick={() => addNewItemToBlock(key)}
+            >
+              +
+            </VSCodeButton>
+          </div>
 
           <div className="block-container">
             {renderItems(config[key].items, key)}
@@ -114,9 +147,12 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
     updateState(newState);
   };
 
-  const updateState = newState => {
-    setState(newState);
-    props.vscode.setState(newState);
+  const removeItemFromBlock = (blockKey, itemId) => {
+    const newState = { ...state };
+    newState[blockKey].items = newState[blockKey].items.filter((item) => {
+      return item.id !== itemId;
+    });
+    updateState(newState);
   };
 
   const renderItems = (items, blockKey) => {
@@ -136,9 +172,15 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
           />
           <VSCodeTextField
             value={item.value}
-            placeholder={`Enter ${item.name}`}
+            placeholder={`Enter ${item.name || "value"}`}
             onChange={(e) => onChangeItem(blockKey, item.id, "value", e)}
           />
+          <VSCodeButton
+            title="Remove item"
+            onClick={() => removeItemFromBlock(blockKey, item.id)}
+          >
+            -
+          </VSCodeButton>
         </div>
       );
     });

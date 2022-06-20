@@ -8,32 +8,10 @@ import ViewLoader from "./views/viewLoader";
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
     "dotenv-editor-ts.openEditor",
-    () => {
-      let openDialogOptions: vscode.OpenDialogOptions = {
-        canSelectFiles: true,
-        canSelectFolders: false,
-        canSelectMany: false,
-        filters: {
-          Env: ["env"],
-        },
-        // open current workspace directory or user home directory
-        defaultUri: vscode.workspace.workspaceFolders
-          ? vscode.workspace.workspaceFolders[0].uri
-          : vscode.Uri.file(process.env.HOME || "/"),
-      };
-
-      vscode.window
-        .showOpenDialog(openDialogOptions)
-        .then(async (uri: vscode.Uri[] | undefined) => {
-          if (uri && uri.length > 0) {
-            const filePath = uri[0].fsPath;
-            vscode.window.showInformationMessage(`Opening ${filePath}`);
-            const view = new ViewLoader(uri[0], context.extensionPath);
-          } else {
-            vscode.window.showErrorMessage("No valid file selected!");
-            return;
-          }
-        });
+    (args) => {
+      const filePath = args.fsPath;
+      vscode.window.showInformationMessage(`Opening ${filePath}`);
+      const view = new ViewLoader(args, context.extensionPath);
     }
   );
 

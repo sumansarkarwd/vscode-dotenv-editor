@@ -156,7 +156,7 @@ export default class ViewLoader {
     let content = "";
     Object.keys(config).forEach((blockKey) => {
       const block = config[blockKey];
-      content += `# Block=${block.name}\n`;
+      content += `# Block=${block.name}\n\n`;
       block.items.forEach((item) => {
         if (item.enabled) {
           content += `${item.name}=${item.value}\n`;
@@ -164,6 +164,7 @@ export default class ViewLoader {
           content += `# ${item.name}=${item.value}\n`;
         }
       });
+      content += "\n";
     });
 
     if (fs.existsSync(fileUri.fsPath)) {

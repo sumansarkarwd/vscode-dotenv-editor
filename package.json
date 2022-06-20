@@ -17,21 +17,29 @@
 		"commands": [
 			{
 				"command": "dotenv-editor-ts.openEditor",
-				"title": "Open Webview"
+				"title": "Open in Dotenv Editor"
 			}
 		],
 		"languages": [
 			{
-				"id": "dummyConfig",
+				"id": "env",
 				"aliases": [
-					"DummyConfig",
+					"env",
 					"dc"
 				],
 				"extensions": [
 					".env"
 				]
 			}
-		]
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"when": "resourceLangId == env",
+					"command": "dotenv-editor-ts.openEditor"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "yarn run compile",
