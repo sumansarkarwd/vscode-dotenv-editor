@@ -46,9 +46,8 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
         }
       });
     }
-
-    setState(newState);
-    props.vscode.setState(newState);
+    
+    updateState(newState);
   };
 
   const renderBlocks = (config) => {
@@ -100,6 +99,22 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
       });
     }
 
+    updateState(newState);
+  };
+
+  const onChangeItem = (blockKey, id, key, e) => {
+    const newState = { ...state };
+    newState[blockKey].items = newState[blockKey].items.map((item) => {
+      if (item.id === id) {
+        item[key] = e.target.value;
+      }
+      return item;
+    });
+
+    updateState(newState);
+  };
+
+  const updateState = newState => {
     setState(newState);
     props.vscode.setState(newState);
   };
@@ -114,10 +129,15 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
             value={item.id}
             onClick={() => onChangeItemEnabledState(blockKey, item.id)}
           />
-          <VSCodeTextField value={item.name} placeholder={`Enter key name`} />
+          <VSCodeTextField
+            value={item.name}
+            placeholder={`Enter key name`}
+            onChange={(e) => onChangeItem(blockKey, item.id, "name", e)}
+          />
           <VSCodeTextField
             value={item.value}
             placeholder={`Enter ${item.name}`}
+            onChange={(e) => onChangeItem(blockKey, item.id, "value", e)}
           />
         </div>
       );

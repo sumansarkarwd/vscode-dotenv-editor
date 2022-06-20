@@ -153,13 +153,25 @@ export default class ViewLoader {
   private saveFileContent(fileUri: vscode.Uri, config: IEnvConfigFile) {
     console.log("config", config);
 
-    // if (fs.existsSync(fileUri.fsPath)) {
-    //   let content: string = JSON.stringify(config);
-    //   fs.writeFileSync(fileUri.fsPath, content);
+    let content = "";
+    Object.keys(config).forEach((blockKey) => {
+      const block = config[blockKey];
+      content += `# Block=${block.name}\n`;
+      block.items.forEach((item) => {
+        if (item.enabled) {
+          content += `${item.name}=${item.value}\n`;
+        } else {
+          content += `# ${item.name}=${item.value}\n`;
+        }
+      });
+    });
 
-    //   vscode.window.showInformationMessage(
-    //     `👍 Configuration saved to ${fileUri.fsPath}`
-    //   );
-    // }
+    if (fs.existsSync(fileUri.fsPath)) {
+      fs.writeFileSync(fileUri.fsPath, content);
+
+      vscode.window.showInformationMessage(
+        `👍 Configuration saved to ${fileUri.fsPath}`
+      );
+    }
   }
 }
