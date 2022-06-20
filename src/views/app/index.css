@@ -10,11 +10,22 @@ main > * {
   margin: 1rem 0;
 }
 
-.item-edit-line {
-  display: flex;
-  margin-bottom: 15px;
+.block-container {
+  margin: 1rem 2rem;
 }
 
-.item-edit-line > * {
-  margin-right: 15px;
+.block-item-container {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.block-item-container > * {
+  margin-right: 1rem;
+}
+
+.top-btn-container {
+  display: flex;
+  justify-content: end;
+  padding: 1rem;
 }

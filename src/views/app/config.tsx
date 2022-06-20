@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as React from "react";
-import { ICommand, CommandAction, IEnvConfigFile, IEnvConfig } from "./model";
+import { ICommand, CommandAction, IEnvConfigFile } from "./model";
 import {
   VSCodeCheckbox,
   VSCodeTextField,
@@ -12,142 +13,98 @@ interface IConfigProps {
   initialData: IEnvConfigFile;
 }
 
-interface IConfigState {
-  config: IEnvConfigFile;
-}
+const ReactFCComponent: React.FC<IConfigProps> = (props) => {
+  const [state, setState] = React.useState<IEnvConfigFile>(props.initialData);
 
-export default class Config extends React.Component<
-  IConfigProps,
-  IConfigState
-> {
-  constructor(props: any) {
-    super(props);
+  const saveConfig = () => {
+    let command: ICommand = {
+      action: CommandAction.Save,
+      content: state,
+    };
+    props.vscode.postMessage(command);
+  };
 
-    let initialData = this.props.initialData;
+  const onChangeBlockEnabledState = (key) => {
+    const newState = { ...state };
+    const newEnabled = !newState[key].enabled;
 
-    let oldState = this.props.vscode.getState();
-    if (oldState) {
-      this.state = oldState;
-    } else {
-      this.state = { config: initialData };
-    }
-  }
-
-  //   private defineState(newSate: IConfigState) {
-  //     this.setState(newSate);
-  //     this.props.vscode.setState(newSate);
-  //   }
-
-  //   onChangeUserActiveState(userIndex: number) {
-  //     let newState = { ...this.state };
-  //     newState.config.users[userIndex].active = !newState.config.users[userIndex]
-  //       .active;
-
-  //     this.defineState(newState);
-  //   }
-
-  //   onAddRole(event: React.KeyboardEvent<HTMLInputElement>, userIndex: number) {
-  //     if (event.keyCode === 13 && event.currentTarget.value !== "") {
-  //       let newState = { ...this.state };
-  //       newState.config.users[userIndex].roles.push(event.currentTarget.value);
-  //       this.defineState(newState);
-  //       event.currentTarget.value = "";
-  //     }
-  //   }
-
-  //   onAddUser(event: React.KeyboardEvent<HTMLInputElement>) {
-  //     if (event.keyCode === 13 && event.currentTarget.value !== "") {
-  //       let newState = { ...this.state };
-  //       let newUser: IUser = {
-  //         name: event.currentTarget.value,
-  //         active: true,
-  //         roles: []
-  //       };
-  //       newState.config.users.push(newUser);
-  //       this.defineState(newState);
-  //       event.currentTarget.value = "";
-  //     }
-  //   }
-
-  renderItems(items: IEnvConfig[], blockKey: string) {
-    return items.map((item) => {
-      return (
-        <div key={item.name}>
-          <VSCodeCheckbox
-            checked={item.enabled}
-            onChange={() => this.onChangeItemEnabledState(blockKey, item.id)}
-          >
-            {item.name}
-          </VSCodeCheckbox>
-          <VSCodeTextField
-            value={item.value}
-            placeholder={`Enter ${item.name}`}
-          />
-        </div>
-      );
+    // disabled all items of block
+    newState[key].items.forEach((item) => {
+      item.enabled = newEnabled;
     });
-  }
+    newState[key].enabled = newEnabled;
 
-  onChangeBlockEnabledState(blockKey: string) {
-    let newState = { ...this.state };
-    newState.config[blockKey].enabled = !newState.config[blockKey].enabled;
+    setState(newState);
+    props.vscode.setState(newState);
+  };
 
-    this.defineState(newState);
-  }
-
-  onChangeItemEnabledState(blockKey: string, id: string) {
-    let newState = { ...this.state };
-    const items = [...newState.config[blockKey].items];
-
-    const item = items.find((i) => i.id === id);
-    if (item) {
-        item.enabled = !item.enabled;
-    }
-    newState.config[blockKey].items = items;
-
-    this.defineState(newState);
-  }
-
-  private defineState(newSate: IConfigState) {
-    this.setState(newSate);
-    this.props.vscode.setState(newSate);
-  }
-
-  renderBlocks(config: IEnvConfigFile) {
+  const renderBlocks = (config) => {
     return Object.keys(config).map((key) => {
       return (
         <div key={key}>
           <VSCodeCheckbox
             checked={config[key].enabled}
-            onChange={() => this.onChangeBlockEnabledState(key)}
+            id={key}
+            value={key}
+            onClick={() => onChangeBlockEnabledState(key)}
           >
-            <h3>{key}</h3>
+            <h2>{key}</h2>
           </VSCodeCheckbox>
-          <VSCodeDivider />
 
-          {this.renderItems(config[key].items, key)}
-          <VSCodeDivider />
+          <div className="block-container">
+            {renderItems(config[key].items, key)}
+          </div>
         </div>
       );
     });
-  }
+  };
 
-  saveConfig() {
-    let command: ICommand = {
-      action: CommandAction.Save,
-      content: this.state.config,
-    };
-    this.props.vscode.postMessage(command);
-  }
+  const onChangeItemEnabledState = (blockKey, id) => {
+    const newState = { ...state };
+    newState[blockKey].items = newState[blockKey].items.map((item) => {
+      if (item.id === id) {
+        item.enabled = !item.enabled;
+      }
+      return item;
+    });
+    setState(newState);
+    props.vscode.setState(newState);
+  };
 
-  render() {
-    return (
-      <>
-        <VSCodeDivider />
-        <VSCodeButton onClick={() => this.saveConfig()}>Save</VSCodeButton>
-        <VSCodeDivider />
-        {this.renderBlocks(this.state.config)}
-      </>
-    );
-  }
-}
+  const renderItems = (items, blockKey) => {
+    return items.map((item) => {
+      return (
+        <div key={item.id} className="block-item-container">
+          <VSCodeCheckbox
+            id={item.id}
+            checked={item.enabled}
+            value={item.id}
+            onClick={() => onChangeItemEnabledState(blockKey, item.id)}
+          />
+          <VSCodeTextField value={item.name} placeholder={`Enter key name`} />
+          <VSCodeTextField
+            value={item.value}
+            placeholder={`Enter ${item.name}`}
+          >
+            <span slot="end" className="codicon codicon-text-size"></span>
+          </VSCodeTextField>
+        </div>
+      );
+    });
+  };
+
+  return (
+    <div className="App">
+      <div className="top-btn-container">
+        <VSCodeButton onClick={saveConfig}>
+          Save
+        </VSCodeButton>
+      </div>
+
+      <VSCodeDivider />
+
+      {renderBlocks(state)}
+    </div>
+  );
+};
+export default ReactFCComponent;
