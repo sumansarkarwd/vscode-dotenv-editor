@@ -22,7 +22,7 @@ export default class ViewLoader {
     if (envConfig) {
       this._panel = vscode.window.createWebviewPanel(
         "configView",
-        "Config View",
+        `Dotenv editor - ${fileUri.fsPath}`,
         vscode.ViewColumn.One,
         {
           enableScripts: true,
