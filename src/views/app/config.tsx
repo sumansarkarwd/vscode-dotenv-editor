@@ -34,6 +34,19 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
     });
     newState[key].enabled = newEnabled;
 
+    if (newEnabled) {
+      // disable all other blocks
+      Object.keys(newState).forEach((blockKey) => {
+        if (blockKey !== key) {
+          newState[blockKey].enabled = false;
+          // disable all items of block
+          newState[blockKey].items.forEach((item) => {
+            item.enabled = false;
+          });
+        }
+      });
+    }
+
     setState(newState);
     props.vscode.setState(newState);
   };
@@ -67,6 +80,26 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
       }
       return item;
     });
+
+    const shouldMakeBlockActive = newState[blockKey].items.some(
+      (item) => item.enabled
+    );
+
+    if (shouldMakeBlockActive) {
+      newState[blockKey].enabled = true;
+
+      // disable all other blocks
+      Object.keys(newState).forEach((bk) => {
+        if (bk !== blockKey) {
+          newState[bk].enabled = false;
+          // disable all items of block
+          newState[bk].items.forEach((item) => {
+            item.enabled = false;
+          });
+        }
+      });
+    }
+
     setState(newState);
     props.vscode.setState(newState);
   };
@@ -85,9 +118,7 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
           <VSCodeTextField
             value={item.value}
             placeholder={`Enter ${item.name}`}
-          >
-            <span slot="end" className="codicon codicon-text-size"></span>
-          </VSCodeTextField>
+          />
         </div>
       );
     });
@@ -96,9 +127,7 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
   return (
     <div className="App">
       <div className="top-btn-container">
-        <VSCodeButton onClick={saveConfig}>
-          Save
-        </VSCodeButton>
+        <VSCodeButton onClick={saveConfig}>Save</VSCodeButton>
       </div>
 
       <VSCodeDivider />
