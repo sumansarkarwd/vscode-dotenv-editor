@@ -125,7 +125,7 @@ export default class ViewLoader {
             envConfig[currentBlock].items.push({
               id: uuidv4(),
               name: key?.trim() || "",
-              value: value ? value.trim() : "",
+              value: value ? value.trim().replace(/(^"|"$|^'|'$)/g, "") : "",
               enabled,
             });
           }
