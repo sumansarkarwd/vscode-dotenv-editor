@@ -23,6 +23,8 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
   }
 
   const [state, setState] = React.useState<IEnvConfigFile>(initialData);
+  const [showAddBlock, setShowAddBlock] = React.useState<boolean>(false);
+  const [newBlockName, setNewBlockName] = React.useState<string>("");
 
   const updateState = (newState) => {
     setState(newState);
@@ -75,6 +77,12 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
     updateState(newState);
   };
 
+  const removeBlock = (key) => {
+    const newState = { ...state };
+    delete newState[key];
+    updateState(newState);
+  };
+
   const renderBlocks = (config) => {
     return Object.keys(config).map((key) => {
       return (
@@ -93,6 +101,13 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
               onClick={() => addNewItemToBlock(key)}
             >
               +
+            </VSCodeButton>
+            <VSCodeButton
+              title="Remove block"
+              onClick={() => removeBlock(key)}
+              appearance="secondary"
+            >
+              -
             </VSCodeButton>
           </div>
 
@@ -155,6 +170,29 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
     updateState(newState);
   };
 
+  const toggleShowAddBlock = (show: boolean) => {
+    setShowAddBlock(show);
+  };
+
+  const handleSaveNewBlock = () => {
+    const newState = { ...state };
+    if (!newState[newBlockName]) {
+      newState[newBlockName] = {
+        name: newBlockName,
+        items: [],
+        enabled: false,
+      };
+    }
+    updateState(newState);
+    setNewBlockName("");
+    toggleShowAddBlock(false);
+  };
+
+  const handleCancelNewBlockAdd = () => {
+    setNewBlockName("");
+    toggleShowAddBlock(false);
+  };
+
   const renderItems = (items, blockKey) => {
     return items.map((item) => {
       return (
@@ -189,8 +227,34 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
   return (
     <div className="App">
       <div className="top-btn-container">
+        <VSCodeButton
+          appearance="secondary"
+          onClick={() => toggleShowAddBlock(true)}
+        >
+          + Block
+        </VSCodeButton>
         <VSCodeButton onClick={saveConfig}>Save</VSCodeButton>
       </div>
+      {showAddBlock && (
+        <div className="add-new-block-container">
+          <div>
+            <VSCodeTextField
+              value={newBlockName}
+              placeholder="Enter block name"
+              onChange={(e) => setNewBlockName(e.target.value)}
+            >
+              Add new block
+            </VSCodeTextField>
+          </div>
+          <VSCodeButton
+            appearance="secondary"
+            onClick={handleCancelNewBlockAdd}
+          >
+            Cancel
+          </VSCodeButton>
+          <VSCodeButton onClick={handleSaveNewBlock}>Save</VSCodeButton>
+        </div>
+      )}
 
       <VSCodeDivider />
 
