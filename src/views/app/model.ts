@@ -33,3 +33,18 @@ export interface IEnvConfigBlock {
 export interface IEnvConfigFile {
   [name: string]: IEnvConfigBlock;
 }
+
+export enum IEdtorAction {
+  AddItem,
+  DeleteItem,
+}
+
+export interface IEdtorActionStep {
+  action: IEdtorAction;
+  data: {
+    block?: IEnvConfigBlock;
+    item?: IEnvConfig;
+    blockName?: string;
+    itemId?: string;
+  };
+}

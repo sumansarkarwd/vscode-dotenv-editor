@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as React from "react";
-import { ICommand, CommandAction, IEnvConfigFile } from "./model";
+import {
+  ICommand,
+  CommandAction,
+  IEnvConfigFile,
+  IEdtorActionStep,
+  IEdtorAction,
+} from "./model";
 import {
   VSCodeCheckbox,
   VSCodeTextField,
@@ -14,6 +20,11 @@ interface IConfigProps {
   initialData: IEnvConfigFile;
 }
 
+interface IActivityStack {
+  position: number;
+  steps: IEdtorActionStep[];
+}
+
 const ReactFCComponent: React.FC<IConfigProps> = (props) => {
   let initialData = props.initialData;
 
@@ -25,6 +36,102 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
   const [state, setState] = React.useState<IEnvConfigFile>(initialData);
   const [showAddBlock, setShowAddBlock] = React.useState<boolean>(false);
   const [newBlockName, setNewBlockName] = React.useState<string>("");
+
+  const [activityUndoStack, setActivityUndoStack] =
+    React.useState<IActivityStack>({
+      position: -1,
+      steps: [],
+    });
+  const [activityRedoStack, setActivityRedoStack] =
+    React.useState<IActivityStack>({
+      position: -1,
+      steps: [],
+    });
+
+  const addUndo = (step: IEdtorActionStep) => {
+    const newActivityUndoStack = { ...activityUndoStack };
+    const newActivityRedoStack = { ...activityRedoStack };
+
+    newActivityUndoStack.steps = newActivityUndoStack.steps.slice(
+      0,
+      newActivityUndoStack.position + 1
+    );
+    newActivityUndoStack.steps.push(step);
+    newActivityUndoStack.position = newActivityUndoStack.position + 1;
+    setActivityUndoStack(newActivityUndoStack);
+
+    newActivityRedoStack.position = -1;
+    newActivityRedoStack.steps = [];
+    setActivityRedoStack(newActivityRedoStack);
+  };
+
+  const addRedo = (step: IEdtorActionStep) => {
+    const newActivityRedoStack = { ...activityRedoStack };
+    newActivityRedoStack.steps = newActivityRedoStack.steps.slice(
+      0,
+      newActivityRedoStack.position + 1
+    );
+    newActivityRedoStack.steps.push(step);
+    newActivityRedoStack.position = newActivityRedoStack.position + 1;
+    setActivityRedoStack(newActivityRedoStack);
+  };
+
+  const undoActivity = () => {
+    const newActivityUndoStack = { ...activityUndoStack };
+    if (newActivityUndoStack.position !== -1) {
+      const undoStep =
+        newActivityUndoStack.steps[newActivityUndoStack.position];
+
+      if (undoStep) {
+        if (undoStep.action === IEdtorAction.DeleteItem) {
+          const item = state[undoStep.data.blockName].items.find(
+            (item) => item.id === undoStep.data.itemId
+          );
+          removeItemFromBlock(undoStep.data.blockName, undoStep.data.itemId);
+          addRedo({
+            action: IEdtorAction.AddItem,
+            data: {
+              blockName: undoStep.data.blockName,
+              item,
+            },
+          });
+        } else if (undoStep.action === IEdtorAction.AddItem) {
+          addNewItemToBlock(undoStep.data.blockName, undoStep.data.item);
+          addRedo({
+            action: IEdtorAction.DeleteItem,
+            data: {
+              blockName: undoStep.data.blockName,
+              item: undoStep.data.item,
+              itemId: undoStep.data.item.id,
+            },
+          });
+        }
+      }
+      newActivityUndoStack.position = newActivityUndoStack.position - 1;
+      setActivityUndoStack(newActivityUndoStack);
+    }
+  };
+
+  const redoActivity = () => {
+    const newActivityRedoStack = { ...activityRedoStack };
+    const newActivityUndoStack = { ...activityUndoStack };
+
+    const redoStep = newActivityRedoStack.steps[newActivityRedoStack.position];
+
+    if (redoStep) {
+      if (redoStep.action === IEdtorAction.AddItem) {
+        addNewItemToBlock(redoStep.data.blockName, redoStep.data.item);
+      } else if (redoStep.action === IEdtorAction.DeleteItem) {
+        removeItemFromBlock(redoStep.data.blockName, redoStep.data.itemId);
+      }
+    }
+    newActivityRedoStack.steps.pop();
+    newActivityRedoStack.position = newActivityRedoStack.position - 1;
+    setActivityRedoStack(newActivityRedoStack);
+
+    newActivityUndoStack.position = newActivityUndoStack.position + 1;
+    setActivityUndoStack(newActivityUndoStack);
+  };
 
   const updateState = (newState) => {
     setState(newState);
@@ -65,15 +172,29 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
     updateState(newState);
   };
 
-  const addNewItemToBlock = (key) => {
-    const newState = { ...state };
-    newState[key].items.push({
-      id: uuidv4(),
+  const onClickAddNewItemToBlock = (key) => {
+    const newItemId = uuidv4();
+    const newItem = {
+      id: newItemId,
       enabled: false,
       name: "",
       value: "",
+    };
+
+    addUndo({
+      action: IEdtorAction.DeleteItem,
+      data: {
+        blockName: key,
+        itemId: newItemId,
+      },
     });
 
+    addNewItemToBlock(key, newItem);
+  };
+
+  const addNewItemToBlock = (key, item) => {
+    const newState = { ...state };
+    newState[key].items.push(item);
     updateState(newState);
   };
 
@@ -98,7 +219,7 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
             </VSCodeCheckbox>
             <VSCodeButton
               title="Add item to block"
-              onClick={() => addNewItemToBlock(key)}
+              onClick={() => onClickAddNewItemToBlock(key)}
             >
               +
             </VSCodeButton>
@@ -164,9 +285,24 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
 
   const removeItemFromBlock = (blockKey, itemId) => {
     const newState = { ...state };
+
+    let itemToRemove;
+
     newState[blockKey].items = newState[blockKey].items.filter((item) => {
+      if (item.id === itemId) {
+        itemToRemove = item;
+      }
       return item.id !== itemId;
     });
+
+    addUndo({
+      action: IEdtorAction.AddItem,
+      data: {
+        blockName: blockKey,
+        item: itemToRemove,
+      },
+    });
+
     updateState(newState);
   };
 
@@ -227,6 +363,13 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
   return (
     <div className="App">
       <div className="top-btn-container">
+        {activityUndoStack.steps.length > 0 && activityUndoStack.position > -1 ? (
+          <VSCodeButton onClick={undoActivity}>Undo</VSCodeButton>
+        ) : null}
+        {activityRedoStack.steps.length &&
+        activityRedoStack.position <= activityRedoStack.steps.length - 1 ? (
+          <VSCodeButton onClick={redoActivity}>Redo</VSCodeButton>
+        ) : null}
         <VSCodeButton
           appearance="secondary"
           onClick={() => toggleShowAddBlock(true)}
@@ -257,6 +400,11 @@ const ReactFCComponent: React.FC<IConfigProps> = (props) => {
       )}
 
       <VSCodeDivider />
+
+      {/* <h1>activityUndoStack</h1>
+      {JSON.stringify(activityUndoStack)}
+      <h1>activityRedoStack</h1>
+      {JSON.stringify(activityRedoStack)} */}
 
       {renderBlocks(state)}
     </div>
